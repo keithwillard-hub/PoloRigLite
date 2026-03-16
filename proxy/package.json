@@ -1,0 +1,13 @@
+{
+  "name": "polorig-udp-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebSocket-to-UDP relay proxy for IC-705 remote control",
+  "main": "udp-proxy.js",
+  "scripts": {
+    "start": "node udp-proxy.js"
+  },
+  "dependencies": {
+    "ws": "^8.0.0"
+  }
+}

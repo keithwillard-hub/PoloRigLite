@@ -1,0 +1,134 @@
+
+Welcome to React Native v0.83
+Starting dev server on http://localhost:8082
+
+
+                        ▒▒▓▓▓▓▒▒
+                     ▒▓▓▓▒▒░░▒▒▓▓▓▒
+                  ▒▓▓▓▓░░░▒▒▒▒░░░▓▓▓▓▒
+                 ▓▓▒▒▒▓▓▓▓▓▓▓▓▓▓▓▓▒▒▒▓▓
+                 ▓▓░░░░░▒▓▓▓▓▓▓▒░░░░░▓▓
+                 ▓▓░░▓▓▒░░░▒▒░░░▒▓▒░░▓▓
+                 ▓▓░░▓▓▓▓▓▒▒▒▒▓▓▓▓▒░░▓▓
+                 ▓▓░░▓▓▓▓▓▓▓▓▓▓▓▓▓▒░░▓▓
+                 ▓▓▒░░▒▒▓▓▓▓▓▓▓▓▒░░░▒▓▓
+                  ▒▓▓▓▒░░░▒▓▓▒░░░▒▓▓▓▒
+                     ▒▓▓▓▒░░░░▒▓▓▓▒
+                        ▒▒▓▓▓▓▒▒
+
+
+                Welcome to Metro v0.83.3
+              Fast - Scalable - Integrated
+
+
+ INFO  Dev server ready. Press Ctrl+C to exit.
+ INFO  Interactive mode is not supported in this environment
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ INFO  [1m[7m💡 JavaScript logs have moved![22m They can now be viewed in React Native DevTools. Tip: Type [1mj[22m in the terminal to open.[27m
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ ERROR  Error: Unable to resolve module ../IC705RigControl from /Users/keithwillard/projects/iphone_dev/PoloRigLite/src/extensions/other/ic705/IC705DebugScreen.jsx: 
+
+None of these files exist:
+  * src/extensions/other/IC705RigControl(.ios.js|.native.js|.js|.ios.jsx|.native.jsx|.jsx|.ios.json|.native.json|.json|.ios.ts|.native.ts|.ts|.ios.tsx|.native.tsx|.tsx)
+  * src/extensions/other/IC705RigControl
+   7 | import { Text, Button } from 'react-native-paper'
+   8 | import { useThemedStyles } from '../../../styles/tools/useThemedStyles'
+>  9 | import { IC705 } from '../IC705RigControl'
+     |                        ^
+  10 |
+  11 | function prepareStyles (baseStyles) {
+  12 |   return {
+    at ModuleResolver.resolveDependency (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/node-haste/DependencyGraph/ModuleResolution.js:136:15)
+    at DependencyGraph.resolveDependency (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/node-haste/DependencyGraph.js:252:43)
+    at /Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/lib/transformHelpers.js:163:21
+    at resolveDependencies (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:43:25)
+    at visit (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:81:30)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async Promise.all (index 0)
+    at async visit (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:90:5)
+    at async Promise.all (index 0)
+    at async buildSubgraph (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:105:3)
+ ERROR  Error: Unable to resolve module ../IC705RigControl from /Users/keithwillard/projects/iphone_dev/PoloRigLite/src/extensions/other/ic705/IC705DebugScreen.jsx: 
+
+None of these files exist:
+  * src/extensions/other/IC705RigControl(.ios.js|.native.js|.js|.ios.jsx|.native.jsx|.jsx|.ios.json|.native.json|.json|.ios.ts|.native.ts|.ts|.ios.tsx|.native.tsx|.tsx)
+  * src/extensions/other/IC705RigControl
+   7 | import { Text, Button } from 'react-native-paper'
+   8 | import { useThemedStyles } from '../../../styles/tools/useThemedStyles'
+>  9 | import { IC705 } from '../IC705RigControl'
+     |                        ^
+  10 |
+  11 | function prepareStyles (baseStyles) {
+  12 |   return {
+    at ModuleResolver.resolveDependency (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/node-haste/DependencyGraph/ModuleResolution.js:136:15)
+    at DependencyGraph.resolveDependency (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/node-haste/DependencyGraph.js:252:43)
+    at /Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/lib/transformHelpers.js:163:21
+    at resolveDependencies (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:43:25)
+    at visit (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:81:30)
+    at async Promise.all (index 0)
+    at async visit (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:90:5)
+    at async Promise.all (index 0)
+    at async buildSubgraph (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:105:3)
+    at async Graph._buildDelta (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/Graph.js:163:22)
+ ERROR  Error: Unable to resolve module ../IC705RigControl from /Users/keithwillard/projects/iphone_dev/PoloRigLite/src/extensions/other/ic705/IC705DebugScreen.jsx: 
+
+None of these files exist:
+  * src/extensions/other/IC705RigControl(.ios.js|.native.js|.js|.ios.jsx|.native.jsx|.jsx|.ios.json|.native.json|.json|.ios.ts|.native.ts|.ts|.ios.tsx|.native.tsx|.tsx)
+  * src/extensions/other/IC705RigControl
+   7 | import { Text, Button } from 'react-native-paper'
+   8 | import { useThemedStyles } from '../../../styles/tools/useThemedStyles'
+>  9 | import { IC705 } from '../IC705RigControl'
+     |                        ^
+  10 |
+  11 | function prepareStyles (baseStyles) {
+  12 |   return {
+    at ModuleResolver.resolveDependency (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/node-haste/DependencyGraph/ModuleResolution.js:136:15)
+    at DependencyGraph.resolveDependency (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/node-haste/DependencyGraph.js:252:43)
+    at /Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/lib/transformHelpers.js:163:21
+    at resolveDependencies (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:43:25)
+    at visit (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:81:30)
+    at async Promise.all (index 1)
+    at async visit (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:90:5)
+    at async Promise.all (index 0)
+    at async buildSubgraph (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:105:3)
+    at async Graph._buildDelta (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/Graph.js:163:22)
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ ERROR  Error: Unable to resolve module ../IC705RigControl from /Users/keithwillard/projects/iphone_dev/PoloRigLite/src/extensions/other/ic705/IC705DebugScreen.jsx: 
+
+None of these files exist:
+  * src/extensions/other/IC705RigControl(.ios.js|.native.js|.js|.ios.jsx|.native.jsx|.jsx|.ios.json|.native.json|.json|.ios.ts|.native.ts|.ts|.ios.tsx|.native.tsx|.tsx)
+  * src/extensions/other/IC705RigControl
+   7 | import { Text, Button } from 'react-native-paper'
+   8 | import { useThemedStyles } from '../../../styles/tools/useThemedStyles'
+>  9 | import { IC705 } from '../IC705RigControl'
+     |                        ^
+  10 |
+  11 | function prepareStyles (baseStyles) {
+  12 |   return {
+    at ModuleResolver.resolveDependency (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/node-haste/DependencyGraph/ModuleResolution.js:136:15)
+    at DependencyGraph.resolveDependency (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/node-haste/DependencyGraph.js:252:43)
+    at /Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/lib/transformHelpers.js:163:21
+    at resolveDependencies (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:43:25)
+    at visit (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:81:30)
+    at async Promise.all (index 1)
+    at async visit (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:90:5)
+    at async Promise.all (index 0)
+    at async buildSubgraph (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/buildSubgraph.js:105:3)
+    at async Graph._buildDelta (/Users/keithwillard/projects/iphone_dev/PoloRigLite/node_modules/metro/src/DeltaBundler/Graph.js:163:22)
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 
+ BUNDLE  ./index.js ░░░░░░░░░░░░░░░░ 0.0% (0/1)
+ BUNDLE  ./index.js 

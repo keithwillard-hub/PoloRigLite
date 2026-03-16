@@ -1,0 +1,4 @@
+STARTED 2026-03-14 21:34:30 derivedData=/tmp/poloriglite-signaled-build simulator=iPhone 17 Pro envfile=.env.local log=/Users/keithwillard/projects/iphone_dev/PoloRigLite/tmp/build-status/ios-build.log
+BUILD_DONE 2026-03-14 21:34:58 derivedData=/tmp/poloriglite-signaled-build envfile=.env.local app=/tmp/poloriglite-signaled-build/Build/Products/Debug-iphonesimulator/PoloRig.app
+INSTALL_DONE 2026-03-14 21:35:00 udid=99FB3D26-968C-448E-8395-349D8876EBDA app=/tmp/poloriglite-signaled-build/Build/Products/Debug-iphonesimulator/PoloRig.app
+LAUNCH_DONE 2026-03-14 21:35:00 udid=99FB3D26-968C-448E-8395-349D8876EBDA bundle=com.ac0vw.polorig.prod
