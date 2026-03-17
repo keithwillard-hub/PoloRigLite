@@ -8,6 +8,58 @@
 
 import { TimeoutError, OperationCancelledError } from './RadioError'
 
+/**
+ * Estimate the transmission duration of CW text in seconds.
+ * Based on Paris standard: 50 units per word at 1 WPM = 60 seconds.
+ * @param {string} text - The text to transmit
+ * @param {number} wpm - Words per minute (default 20)
+ * @returns {number} Duration in seconds
+ */
+function estimateCWDuration (text, wpm = 20) {
+  if (!text || text.length === 0) return 0
+  const effectiveWPM = Math.max(1, wpm)
+
+  // Morse timing (in units where 1 dot = 1 unit):
+  // Dot = 1, Dash = 3, Intra-character gap = 1, Inter-character gap = 3, Word gap = 7
+  const morseUnits = {
+    'A': [1, 3], 'B': [3, 1, 1, 1], 'C': [3, 1, 3, 1], 'D': [3, 1, 1], 'E': [1],
+    'F': [1, 1, 3, 1], 'G': [3, 3, 1], 'H': [1, 1, 1, 1], 'I': [1, 1], 'J': [1, 3, 3, 3],
+    'K': [3, 1, 3], 'L': [1, 3, 1, 1], 'M': [3, 3], 'N': [3, 1], 'O': [3, 3, 3],
+    'P': [1, 3, 3, 1], 'Q': [3, 3, 1, 3], 'R': [1, 3, 1], 'S': [1, 1, 1], 'T': [3],
+    'U': [1, 1, 3], 'V': [1, 1, 1, 3], 'W': [1, 3, 3], 'X': [3, 1, 1, 3], 'Y': [3, 1, 3, 3],
+    'Z': [3, 3, 1, 1], '0': [3, 3, 3, 3, 3], '1': [1, 3, 3, 3, 3], '2': [1, 1, 3, 3, 3],
+    '3': [1, 1, 1, 3, 3], '4': [1, 1, 1, 1, 3], '5': [1, 1, 1, 1, 1], '6': [3, 1, 1, 1, 1],
+    '7': [3, 3, 1, 1, 1], '8': [3, 3, 3, 1, 1], '9': [3, 3, 3, 3, 1], '?': [1, 1, 3, 3, 1, 1],
+    '/': [3, 1, 1, 3, 1], '=': [3, 1, 1, 1, 3]
+  }
+
+  let totalUnits = 0
+  const upperText = text.toUpperCase()
+
+  for (let i = 0; i < upperText.length; i++) {
+    const char = upperText[i]
+    if (char === ' ') {
+      // Word gap: 7 units, but we already added 3 for the previous character's inter-char gap
+      // So add 4 more to make it 7 total
+      totalUnits += 4
+    } else {
+      const units = morseUnits[char]
+      if (units) {
+        // Add units for this character
+        totalUnits += units.reduce((a, b) => a + b, 0)
+        // Add inter-character gap (3 units), except for last char or if next is space
+        if (i < upperText.length - 1 && upperText[i + 1] !== ' ') {
+          totalUnits += 3
+        }
+      }
+    }
+  }
+
+  // Duration = (total units * 1.2 / WPM) seconds
+  // 1.2 = 60 seconds / 50 units per word
+  return (totalUnits * 1.2) / effectiveWPM
+}
+
 // Operation type definitions with default timeouts
 const OperationDefs = {
   status: { timeout: 12000, expectsFreq: true, expectsMode: true },
@@ -177,14 +229,17 @@ export class OperationQueue {
         this._flush()
         this._suspendTraffic()
         const { buildSendCW } = require('./CIVProtocol')
-        this._sendCIV(buildSendCW(op.payload), { expectsReply: false })
-        // After 800ms delay, resume traffic and complete
+        const text = op.payload?.text || op.payload || ''
+        const wpm = op.payload?.wpm || 20
+        this._sendCIV(buildSendCW(text), { expectsReply: false })
+        // Calculate delay based on WPM (min 800ms for short transmissions)
+        const durationMs = Math.max(estimateCWDuration(text, wpm) * 1000, 800)
         setTimeout(() => {
           if (this._active === op) {
             this._resumeTraffic()
             this._finishActive(true, true)
           }
-        }, 800)
+        }, durationMs)
         break
       }
       case 'setCWSpeed': {

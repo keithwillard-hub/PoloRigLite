@@ -1,6 +1,6 @@
 /*
  * Abstract transport contract for UDP communication.
- * Both NativeUDPTransport and WebSocketTransport implement this interface.
+ * NativeUDPTransport implements this interface.
  */
 
 export class TransportInterface {

@@ -3,35 +3,32 @@
  * Sends/receives raw bytes as base64 strings across the bridge.
  */
 
-import { NativeModules, NativeEventEmitter, Platform, TurboModuleRegistry, Alert } from 'react-native'
+import { NativeModules, NativeEventEmitter, Platform, TurboModuleRegistry } from 'react-native'
 import { TransportInterface } from './TransportInterface'
 import { toBase64, fromBase64 } from '../protocol/ByteUtils'
 
+/**
+ * Resolve the native UDP transport module.
+ * Tries multiple resolution paths for compatibility with different RN architectures.
+ * @returns {object|null} The native module or null if unavailable
+ */
 function resolveNativeUDP () {
   if (Platform.OS !== 'ios') return null
-
-  const debugInfo = []
 
   // Try TurboModuleRegistry first (new architecture)
   try {
     const turbo = TurboModuleRegistry?.get?.('UDPTransport')
-    debugInfo.push('TurboModuleRegistry.get: ' + (turbo ? 'FOUND' : 'null'))
     if (turbo) return turbo
   } catch (e) {
-    debugInfo.push('TurboModuleRegistry error: ' + e.message)
+    // Continue to next fallback
   }
 
-  // In bridgeless mode, modules are on global.nativeModuleProxy (not __turboModuleProxy)
+  // In bridgeless mode, modules are on global.nativeModuleProxy
   try {
     const nmp = global.nativeModuleProxy
-    debugInfo.push('nativeModuleProxy exists: ' + !!nmp)
-    if (nmp) {
-      const mod = nmp.UDPTransport
-      debugInfo.push('nativeModuleProxy.UDPTransport: ' + (mod ? 'FOUND' : 'null'))
-      if (mod) return mod
-    }
+    if (nmp?.UDPTransport) return nmp.UDPTransport
   } catch (e) {
-    debugInfo.push('nativeModuleProxy error: ' + e.message)
+    // Continue to next fallback
   }
 
   // Fall back to NativeModules (old bridge)
@@ -39,15 +36,21 @@ function resolveNativeUDP () {
     return NativeModules.UDPTransport
   }
 
-  debugInfo.push('NativeModules.UDPTransport: null')
-  setTimeout(() => {
-    Alert.alert('UDPTransport Debug', debugInfo.join('\n'))
-  }, 2000)
   return null
 }
 
 const NativeUDP = resolveNativeUDP()
 const emitter = NativeUDP ? new NativeEventEmitter(NativeUDP) : null
+
+/**
+ * Error thrown when the native UDP module is not available.
+ */
+export class NativeModuleError extends Error {
+  constructor () {
+    super('UDPTransport native module not available. Ensure the iOS native module is properly linked.')
+    this.name = 'NativeModuleError'
+  }
+}
 
 export class NativeUDPTransport extends TransportInterface {
   constructor () {
@@ -57,7 +60,7 @@ export class NativeUDPTransport extends TransportInterface {
   }
 
   async createSocket (id) {
-    if (!NativeUDP) throw new Error('UDPTransport native module not available')
+    if (!NativeUDP) throw new NativeModuleError()
     await NativeUDP.createSocket(id)
 
     // Start listening for data if not already
@@ -72,7 +75,7 @@ export class NativeUDPTransport extends TransportInterface {
   }
 
   async send (id, host, port, data) {
-    if (!NativeUDP) throw new Error('UDPTransport native module not available')
+    if (!NativeUDP) throw new NativeModuleError()
     const b64 = toBase64(data)
     await NativeUDP.send(id, host, port, b64)
   }

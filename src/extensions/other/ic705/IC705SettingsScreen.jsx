@@ -126,15 +126,6 @@ export default function IC705SettingsScreen ({ navigation, splitView }) {
             </Button>
           </View>
 
-          <View style={{ paddingHorizontal: styles.oneSpace * 2, paddingVertical: styles.halfSpace }}>
-            <Button
-              mode="outlined"
-              onPress={() => navigation.navigate('IC705Debug')}
-              icon="bug"
-            >
-              Debug View
-            </Button>
-          </View>
         </H2kListSection>
 
         {/* WiFi Mode */}
@@ -196,27 +187,6 @@ export default function IC705SettingsScreen ({ navigation, splitView }) {
             secureTextEntry={true}
             autoCapitalize="none"
             autoCorrect={false}
-          />
-        </H2kListSection>
-
-        {/* UI Mode */}
-        <H2kListSection>
-          <H2kListSubheader>UI Mode</H2kListSubheader>
-
-          <H2kListItem
-            title="Swift (Native UDP)"
-            description="Direct rig control via iOS native code"
-            leftIcon="cellphone"
-            rightSwitchValue={(ic705Settings.uiMode || 'swift') === 'swift'}
-            rightSwitchOnValueChange={() => updateIC705Setting('uiMode', 'swift')}
-            onPress={() => updateIC705Setting('uiMode', 'swift')}
-          />
-          <H2kListItem
-            title="WebSocket Proxy"
-            description="Connect via proxy server (coming soon)"
-            leftIcon="server-network"
-            rightSwitchValue={ic705Settings.uiMode === 'websocket'}
-            disabled={true}
           />
         </H2kListSection>
 

@@ -6,22 +6,20 @@
  * Exposes the same public API as the old src/native/IC705RigControl.js.
  */
 
-import { AppState } from 'react-native'
 import { ConnectionManager, ConnectionState } from './protocol/ConnectionManager'
 import { CWKeyer } from './keyer/CWKeyer'
-import { interpolate, standardVariables } from './keyer/CWTemplateEngine'
 import { getTransport } from './transport/transportConfig'
 import {
-  buildFrame, buildSendCW, buildStopCW, buildSetCWSpeed,
-  Command, formatMHz, formatKHz
+  buildSendCW, buildSetCWSpeed,
+  formatMHz
 } from './protocol/CIVProtocol'
 import { NotConnectedError, AlreadyConnectingError } from './protocol/RadioError'
 
 let _instance = null
 
-function getInstance (settings) {
+function getInstance () {
   if (!_instance) {
-    const transport = getTransport(settings)
+    const transport = getTransport()
     _instance = {
       cm: new ConnectionManager(transport),
       keyer: new CWKeyer(),
@@ -45,9 +43,9 @@ export const IC705 = {
    * Connect to IC-705 via WiFi.
    * @returns {Promise<{ radioName: string }>}
    */
-  connect: (host, username, password, settings) => {
+  connect: (host, username, password) => {
     return new Promise((resolve, reject) => {
-      const inst = getInstance(settings)
+      const inst = getInstance()
       if (inst.connected) {
         reject(new AlreadyConnectingError())
         return
@@ -76,27 +74,14 @@ export const IC705 = {
         }
       })
 
-      // Auto-disconnect on app background/inactive
-      inst.appStateSubscription = AppState.addEventListener('change', (nextState) => {
-        if (nextState === 'background' || nextState === 'inactive') {
-          IC705.disconnect(settings)
-        }
-      })
-
       cm.connect(host, username, password).catch(reject)
     })
   },
 
   /** Disconnect from IC-705 with graceful 1s teardown. */
-  disconnect: async (settings) => {
-    const inst = getInstance(settings)
+  disconnect: async () => {
+    const inst = getInstance()
     if (!inst.connected) return
-
-    // Remove AppState listener
-    if (inst.appStateSubscription) {
-      inst.appStateSubscription.remove()
-      inst.appStateSubscription = null
-    }
 
     inst.keyer.cancelSend()
     await inst.cm.disconnect()
@@ -112,15 +97,15 @@ export const IC705 = {
    * Query current frequency + mode via operation queue.
    * @returns {Promise<{ frequency: number, mode: string }>}
    */
-  queryStatus: async (settings) => {
-    const inst = getInstance(settings)
+  queryStatus: async () => {
+    const inst = getInstance()
     if (!inst.connected) throw new NotConnectedError()
     return inst.cm.queryStatus()
   },
 
   /** Send raw CW text via operation queue. */
-  sendCW: async (text, settings) => {
-    const inst = getInstance(settings)
+  sendCW: async (text) => {
+    const inst = getInstance()
     if (!inst.connected) throw new NotConnectedError()
     return inst.cm.enqueueSendCW(text)
   },
@@ -128,8 +113,8 @@ export const IC705 = {
   /**
    * Send templated CW with $variable interpolation + {MACRO} expansion.
    */
-  sendTemplatedCW: async (template, variables, settings) => {
-    const inst = getInstance(settings)
+  sendTemplatedCW: async (template, variables) => {
+    const inst = getInstance()
     if (!inst.connected) throw new NotConnectedError()
 
     const context = {
@@ -144,8 +129,8 @@ export const IC705 = {
   },
 
   /** Set CW keying speed in WPM (6-48) via operation queue. */
-  setCWSpeed: async (wpm, settings) => {
-    const inst = getInstance(settings)
+  setCWSpeed: async (wpm) => {
+    const inst = getInstance()
     if (!inst.connected) throw new NotConnectedError()
     return inst.cm.enqueueSetCWSpeed(wpm)
   },
@@ -154,15 +139,15 @@ export const IC705 = {
    * Query CW keying speed via operation queue.
    * @returns {Promise<{ cwSpeed: number }>}
    */
-  queryCWSpeed: async (settings) => {
-    const inst = getInstance(settings)
+  queryCWSpeed: async () => {
+    const inst = getInstance()
     if (!inst.connected) throw new NotConnectedError()
     return inst.cm.queryCWSpeed()
   },
 
   /** Cancel CW transmission in progress via operation queue. */
-  cancelCW: (settings) => {
-    const inst = getInstance(settings)
+  cancelCW: () => {
+    const inst = getInstance()
     inst.keyer.cancelSend()
     if (inst.connected) {
       inst.cm.enqueueStopCW().catch(() => {})
@@ -170,7 +155,7 @@ export const IC705 = {
   },
 
   /** Get current status. */
-  getStatus: async (settings) => {
+  getStatus: async () => {
     const inst = _instance
     if (!inst) return { isConnected: false }
     return {
@@ -188,52 +173,52 @@ export const IC705 = {
 
   // --- Event subscriptions ---
 
-  onConnectionStateChanged: (cb, settings) => {
-    const inst = getInstance(settings)
+  onConnectionStateChanged: (cb) => {
+    const inst = getInstance()
     return inst.cm.on('connectionStateChanged', cb)
   },
 
-  onSessionStateChanged: (cb, settings) => {
-    const inst = getInstance(settings)
+  onSessionStateChanged: (cb) => {
+    const inst = getInstance()
     return inst.cm.on('sessionStateChanged', cb)
   },
 
-  onFrequencyChanged: (cb, settings) => {
-    const inst = getInstance(settings)
+  onFrequencyChanged: (cb) => {
+    const inst = getInstance()
     return inst.cm.on('frequencyChanged', (hz) => {
       cb({ frequencyHz: hz, display: formatMHz(hz) })
     })
   },
 
-  onModeChanged: (cb, settings) => {
-    const inst = getInstance(settings)
+  onModeChanged: (cb) => {
+    const inst = getInstance()
     return inst.cm.on('modeChanged', (mode) => cb({ mode }))
   },
 
-  onCWSpeedChanged: (cb, settings) => {
-    const inst = getInstance(settings)
+  onCWSpeedChanged: (cb) => {
+    const inst = getInstance()
     return inst.cm.on('cwSpeedChanged', (wpm) => cb({ wpm }))
   },
 
-  onSendingStateChanged: (cb, settings) => {
-    const inst = getInstance(settings)
+  onSendingStateChanged: (cb) => {
+    const inst = getInstance()
     const unsub1 = inst.keyer.on('sendingStarted', () => cb({ isSending: true }))
     const unsub2 = inst.keyer.on('sendingEnded', () => cb({ isSending: false }))
     return () => { unsub1(); unsub2() }
   },
 
-  onRadioNameChanged: (cb, settings) => {
-    const inst = getInstance(settings)
+  onRadioNameChanged: (cb) => {
+    const inst = getInstance()
     return inst.cm.on('radioNameChanged', (name) => cb({ name }))
   },
 
-  onOperationStarted: (cb, settings) => {
-    const inst = getInstance(settings)
+  onOperationStarted: (cb) => {
+    const inst = getInstance()
     return inst.cm.on('operationStarted', (type) => cb({ type }))
   },
 
-  onOperationCompleted: (cb, settings) => {
-    const inst = getInstance(settings)
+  onOperationCompleted: (cb) => {
+    const inst = getInstance()
     return inst.cm.on('operationCompleted', (type, success) => cb({ type, success }))
   },
 

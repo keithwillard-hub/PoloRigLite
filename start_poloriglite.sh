@@ -5,7 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 APP_BUNDLE_ID="${APP_BUNDLE_ID:-com.ac0vw.polorig.prod}"
 SIMULATOR_NAME="${SIMULATOR_NAME:-iPhone 17 Pro}"
-METRO_PORT="${METRO_PORT:-8081}"
+METRO_PORT="${METRO_PORT:-8082}"
 METRO_LOG="${ROOT_DIR}/tmp/metro-start.log"
 ENVFILE="${ENVFILE:-.env.local}"
 

@@ -164,18 +164,18 @@ describe('OperationQueue', () => {
 
   describe('sendCW', () => {
     it('flushes queue and suspends traffic before sending', () => {
-      queue.enqueue('sendCW', 'CQ CQ').catch(() => {})
+      queue.enqueue('sendCW', { text: 'CQ CQ', wpm: 20 }).catch(() => {})
       expect(flushed).toBe(1)
       expect(suspended).toBe(1)
     })
 
-    it('resumes traffic and completes after 800ms delay', async () => {
-      const promise = queue.enqueue('sendCW', 'CQ')
+    it('resumes traffic and completes after calculated delay', async () => {
+      const promise = queue.enqueue('sendCW', { text: 'E', wpm: 20 }) // Single character = very short
       let resolved = false
       promise.then(() => { resolved = true })
 
       expect(resolved).toBe(false)
-      jest.advanceTimersByTime(900)
+      jest.advanceTimersByTime(900) // Min delay is 800ms
       await Promise.resolve()
 
       expect(resumed).toBe(1)

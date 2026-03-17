@@ -132,6 +132,11 @@ export class ConnectionManager extends EventEmitter {
     this._lastPingSent = null
     this.latencyMs = 0
 
+    // Connection health monitoring
+    this._lastResponseTime = 0
+    this._healthCheckTimer = null
+    this._healthCheckInterval = 5000 // Check every 5 seconds
+
     // Retransmit buffer
     this._sentPackets = { control: [], serial: [] }
     this._maxRetransmitBuffer = 20
@@ -301,7 +306,7 @@ export class ConnectionManager extends EventEmitter {
    * @returns {Promise<boolean>}
    */
   enqueueSendCW (text) {
-    return this.enqueueOperation('sendCW', text)
+    return this.enqueueOperation('sendCW', { text, wpm: this._cwSpeed })
   }
 
   /**
@@ -424,6 +429,9 @@ export class ConnectionManager extends EventEmitter {
   _handleIncoming (socketId, data) {
     if (!data || data.length < PacketSize.control) return
     const type = parsePacketType(data)
+
+    // Record response time for health monitoring
+    this._lastResponseTime = Date.now()
 
     if (socketId === 'control') {
       this._handleControlPacket(type, data)
@@ -609,6 +617,9 @@ export class ConnectionManager extends EventEmitter {
     // Transition session state to connected
     this._session.transition(State.connected, this._radioName)
     this._setState(ConnectionState.connected)
+
+    // Start connection health monitoring
+    this._startHealthCheck()
 
     // Initial rig state requests
     console.log('[CM] Serial ready - requesting initial rig state')
@@ -946,10 +957,34 @@ export class ConnectionManager extends EventEmitter {
     this._startPolling()
   }
 
+  // --- Connection Health Monitoring ---
+
+  _startHealthCheck () {
+    this._stopHealthCheck()
+    this._lastResponseTime = Date.now()
+    this._healthCheckTimer = setInterval(() => {
+      if (!this._session.isConnected) return
+      const elapsed = Date.now() - this._lastResponseTime
+      if (elapsed > this._healthCheckInterval) {
+        // No response for 5+ seconds, connection is degraded
+        console.log('[CM] Health check: no response for', elapsed, 'ms, emitting degraded')
+        this.emit('connectionDegraded', { elapsedMs: elapsed })
+      }
+    }, this._healthCheckInterval)
+  }
+
+  _stopHealthCheck () {
+    if (this._healthCheckTimer) {
+      clearInterval(this._healthCheckTimer)
+      this._healthCheckTimer = null
+    }
+  }
+
   // --- Cleanup ---
 
   _cleanup () {
     this._stopPolling()
+    this._stopHealthCheck()
     if (this._connectTimeout) { clearTimeout(this._connectTimeout); this._connectTimeout = null }
     this._cancelResendTimer()
     if (this._pingTimerCtrl) { clearInterval(this._pingTimerCtrl); this._pingTimerCtrl = null }

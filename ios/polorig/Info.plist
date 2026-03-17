@@ -54,6 +54,8 @@
 	</dict>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Bluetooth will be used to control certain radios and other devices.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>PoloRigLite connects to your IC-705 radio over your local WiFi network.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Your location will be used to determine your Maidenhead Grid Square to include in your own logs.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

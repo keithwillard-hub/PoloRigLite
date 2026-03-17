@@ -39,7 +39,6 @@ import SyncSettingsScreen from './SyncSettingsScreen'
 import WavelogSettingsScreen from './WavelogSettingsScreen'
 import NoticesSettingsScreen from './NoticesSettingsScreen'
 import IC705SettingsScreen from '../../../extensions/other/ic705/IC705SettingsScreen'
-import IC705DebugScreen from '../../../extensions/other/ic705/IC705DebugScreen'
 
 import { MainSettingsForDistribution } from '../../../distro'
 
@@ -392,11 +391,6 @@ function settingsScreensArray ({ t, includeMain, topLevelBack, splitView }) {
       options={{ title: 'IC-705 Rig Control', leftAction: topLevelBack ? 'back' : 'none' }}
       component={IC705SettingsScreen}
     />,
-
-    <Stack.Screen name="IC705Debug" key="IC705Debug"
-      options={{ title: 'IC-705 Debug', leftAction: topLevelBack ? 'back' : 'none' }}
-      component={IC705DebugScreen}
-    />
 
   ]
 

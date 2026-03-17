@@ -36,9 +36,6 @@ export const IC705_DEFAULTS = {
   cwTemplate: envString(Config.IC705_CW_TEMPLATE, '$callsign?'),
   autoSendCWOnMiss: envBoolean(Config.IC705_AUTO_SEND_CW_ON_MISS, true),
   sidetoneEnabled: envBoolean(Config.IC705_SIDETONE_ENABLED, true),
-  uiMode: envString(Config.IC705_UI_MODE, 'swift'),
-  transport: envString(Config.IC705_TRANSPORT, 'native'),
-  proxyUrl: envString(Config.IC705_PROXY_URL, 'ws://localhost:8765'),
   civ: {
     radioAddress: envString(Config.IC705_RADIO_ADDRESS, '0xA4'),
     controllerAddress: envString(Config.IC705_CONTROLLER_ADDRESS, '0xE0')
@@ -76,9 +73,6 @@ export function withIC705Defaults (ic705 = {}) {
     },
     autoSendCWOnMiss: ic705.autoSendCWOnMiss ?? ic705.autoSendCWOnQRZMiss ?? IC705_DEFAULTS.autoSendCWOnMiss,
     cwTemplate: ic705.cwTemplate ?? IC705_DEFAULTS.cwTemplate,
-    sidetoneEnabled: ic705.sidetoneEnabled ?? IC705_DEFAULTS.sidetoneEnabled,
-    uiMode: ic705.uiMode ?? IC705_DEFAULTS.uiMode,
-    transport: ic705.transport ?? IC705_DEFAULTS.transport,
-    proxyUrl: ic705.proxyUrl ?? IC705_DEFAULTS.proxyUrl
+    sidetoneEnabled: ic705.sidetoneEnabled ?? IC705_DEFAULTS.sidetoneEnabled
   }
 }

@@ -440,7 +440,7 @@ describe('IC705RigControl integration', () => {
 
     it('enqueueSendCW completes after delay', async () => {
       transport.clearSent()
-      const promise = cm.enqueueSendCW('CQ')
+      const promise = cm.enqueueSendCW('E') // Single character for short delay
 
       jest.advanceTimersByTime(900)
       const result = await promise
@@ -448,21 +448,8 @@ describe('IC705RigControl integration', () => {
     })
   })
 
-  describe('AppState disconnect', () => {
-    let appStateCallback
-
-    beforeAll(() => {
-      jest.mock('react-native', () => ({
-        AppState: {
-          addEventListener: jest.fn((event, cb) => {
-            appStateCallback = cb
-            return { remove: jest.fn() }
-          })
-        }
-      }), { virtual: true })
-    })
-
-    it('background triggers disconnect', async () => {
+  describe('disconnect behavior', () => {
+    it('disconnect sets state to disconnected', async () => {
       await cm.connect('192.168.1.100', 'admin', 'pass')
       driveToConnected(transport, cm)
       expect(cm.isConnected).toBe(true)
@@ -471,22 +458,14 @@ describe('IC705RigControl integration', () => {
       expect(cm.state).toBe(ConnectionState.disconnected)
     })
 
-    it('inactive triggers disconnect', async () => {
-      await cm.connect('192.168.1.100', 'admin', 'pass')
-      driveToConnected(transport, cm)
-      expect(cm.isConnected).toBe(true)
-
-      await cm.disconnect()
-      expect(cm.state).toBe(ConnectionState.disconnected)
-    })
-
-    it('AppState listener cleanup on disconnect', async () => {
+    it('disconnect is idempotent', async () => {
       await cm.connect('192.168.1.100', 'admin', 'pass')
       driveToConnected(transport, cm)
 
       await cm.disconnect()
       expect(cm.state).toBe(ConnectionState.disconnected)
 
+      // Second disconnect should not throw
       await cm.disconnect()
       expect(cm.state).toBe(ConnectionState.disconnected)
     })
