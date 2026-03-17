@@ -210,22 +210,25 @@ Metro bundler runs on port **8082** (not default 8081):
 ```
 src/extensions/other/ic705/
 ├── IC705RigControl.js           # Main orchestrator singleton
-├── IC705StatusBar.jsx           # Status bar component
-├── IC705SettingsScreen.jsx      # Settings/configuration
-├── IC705DebugScreen.jsx         # Debug view (optional)
+├── IC705SettingsScreen.jsx      # Settings/configuration (no Debug button in prod)
+├── IC705DebugScreen.jsx         # Debug view (preserved for development)
+├── defaults.js                  # Default configuration values
 ├── hooks/
 │   └── useIC705.js              # React hook for radio state
 ├── protocol/
 │   ├── ConnectionManager.js     # RS-BA1 connection state machine
+│   ├── OperationQueue.js        # Serialized radio operations
 │   ├── RSBA1Protocol.js         # Packet parsing/building
 │   ├── CIVProtocol.js           # CI-V command protocol
 │   ├── SessionState.js          # Connection state transitions
-│   ├── OperationQueue.js        # Serialized operations
 │   ├── RadioError.js            # Error types
+│   ├── ByteUtils.js             # Binary data utilities
+│   ├── CredentialCodec.js       # Password encoding
 │   └── EventEmitter.js          # Minimal EventEmitter
 ├── transport/
-│   ├── NativeUDPTransport.js    # JS transport wrapper
-│   └── transportConfig.js       # Transport factory
+│   ├── NativeUDPTransport.js    # JS transport wrapper (native UDP only)
+│   ├── TransportInterface.js    # Abstract transport interface
+│   └── transportConfig.js       # Transport factory (native UDP only)
 └── keyer/
     ├── CWKeyer.js               # CW transmission engine
     └── CWTemplateEngine.js      # Template interpolation
@@ -234,7 +237,8 @@ ios/polorig/
 ├── UDPTransport.swift           # Swift UDP implementation
 ├── UDPTransportBridge.m         # RN bridge registration
 ├── ReactNativeDelegate+Modules.mm # TurboModule hook
-└── AppDelegate.swift            # RN setup + bundle URL
+├── AppDelegate.swift            # RN setup + bundle URL
+└── Info.plist                   # Includes NSLocalNetworkUsageDescription
 ```
 
 ## Key Design Decisions
@@ -247,11 +251,33 @@ ios/polorig/
 
 4. **Polling Strategy**: 1-second frequency polling when idle, suspended during CW transmission.
 
-5. **TurboModule Registration**: Method swizzling on `RCTDefaultReactNativeFactoryDelegate` because React Native 0.83+ with New Architecture requires explicit module registration.
+5. **WPM-Based CW Timing**: CW transmission completion is calculated based on actual Morse timing (Paris standard) rather than hardcoded delays. This ensures accurate timing across different speeds (6-48 WPM).
+
+6. **Connection Health Monitoring**: Active health checks detect stalled connections and emit `connectionDegraded` events for UI feedback.
+
+7. **TurboModule Registration**: Method swizzling on `RCTDefaultReactNativeFactoryDelegate` because React Native 0.83+ with New Architecture requires explicit module registration.
 
 ## Testing
 
-Manual test checklist:
+### Unit Tests
+
+All tests passing (199 total):
+
+```bash
+npm test -- --testPathPattern="ic705"
+```
+
+Test coverage includes:
+- Connection lifecycle (connect → authenticate → connected)
+- Session state machine transitions
+- Frequency/mode/CW speed tracking from CI-V responses
+- CW keyer chunking and pacing
+- Template interpolation with macros
+- Operation queue serialization and timeouts
+- CI-V command queue behavior (ACK/NAK handling)
+
+### Manual Test Checklist
+
 - [ ] Connect to radio (Home LAN or Field AP mode)
 - [ ] Frequency display updates when radio VFO changes
 - [ ] Mode display updates (CW/SSB/FM/etc.)
@@ -259,9 +285,26 @@ Manual test checklist:
 - [ ] CW send with template interpolation (`$callsign`, `$frequencyHz`, etc.)
 - [ ] Navigate away/back - frequency stays synced
 - [ ] New QSO uses current radio frequency
+- [ ] Connection recovers from brief network interruption
+
+## Production Checklist
+
+See `PRODUCTION_READINESS_PLAN.md` for full details.
+
+**Completed:**
+- [x] WebSocket transport removed (native UDP only)
+- [x] Settings UI simplified (no transport mode selection)
+- [x] Debug button removed from settings screen
+- [x] Native UDP hardened with error handling
+- [x] Connection health monitoring implemented
+- [x] WPM-based CW timing (not hardcoded)
+- [x] Unit tests updated and passing
+- [x] NSLocalNetworkUsageDescription added to Info.plist
+- [x] Metro port fixed to 8082
 
 ## Related Documentation
 
+- `IC705_TECHNICAL_GUIDE.md` - Deep dive into JS/Swift bridge, sequence diagrams, data flow
+- `PRODUCTION_READINESS_PLAN.md` - Testing and deployment checklist
+- `REBUILD_PLAN.md` - Migration from native to JS implementation notes
 - `ARCHITECTURE.md` - Overall app architecture
-- `PLAN.md` - Development plan
-- `REBUILD_PLAN.md` - Migration from native to JS implementation
