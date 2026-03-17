@@ -379,141 +379,85 @@ subscription.remove();
 
 ### 1. Connection Establishment Sequence
 
-```
-┌──────────┐     ┌──────────────┐     ┌───────────────┐     ┌──────────────┐     ┌────────┐
-│   User   │     │IC705Settings │     │IC705RigControl│     │ConnectionMgr │     │  Radio │
-└────┬─────┘     └──────┬───────┘     └───────┬───────┘     └──────┬───────┘     └───┬────┘
-     │                  │                     │                    │                 │
-     │  tap Connect     │                     │                    │                 │
-     │─────────────────>│                     │                    │                 │
-     │                  │    connect(ip,...)  │                    │                 │
-     │                  │────────────────────>│                    │                 │
-     │                  │                     │                    │                 │
-     │                  │                     │  create control    │                 │
-     │                  │                     │  socket (50001)    │                 │
-     │                  │                     │───────────────────>│                 │
-     │                  │                     │                    │  areYouThere()  │
-     │                  │                     │                    │────────────────>│
-     │                  │                     │                    │                 │
-     │                  │                     │                    │  iAmHere        │
-     │                  │                     │                    │<────────────────│
-     │                  │                     │                    │                 │
-     │                  │                     │                    │  areYouReady()  │
-     │                  │                     │                    │────────────────>│
-     │                  │                     │                    │                 │
-     │                  │                     │                    │  loginResponse  │
-     │                  │                     │                    │<────────────────│
-     │                  │                     │                    │                 │
-     │                  │                     │                    │  capabilities   │
-     │                  │                     │                    │<────────────────│
-     │                  │                     │                    │                 │
-     │                  │                     │  create serial    │                 │
-     │                  │                     │  socket (50002)   │                 │
-     │                  │                     │───────────────────>│                 │
-     │                  │                     │                    │                 │
-     │                  │                     │    openSerial()   │                 │
-     │                  │                     │───────────────────>│                 │
-     │                  │                     │                    │                 │
-     │                  │                     │    serial opened  │                 │
-     │                  │                     │<───────────────────│                 │
-     │                  │                     │                    │                 │
-     │                  │  connectionState   │                    │                 │
-     │                  │  'connected'       │                    │                 │
-     │                  │<────────────────────│                    │                 │
-     │  show status     │                     │                    │                 │
-     │<─────────────────│                     │                    │                 │
+```mermaid
+sequenceDiagram
+    actor User
+    participant Settings as IC705Settings
+    participant RigCtrl as IC705RigControl
+    participant ConnMgr as ConnectionManager
+    participant Radio as IC-705 Radio
+
+    User->>Settings: tap Connect
+    Settings->>RigCtrl: connect(ip, user, pass)
+
+    RigCtrl->>ConnMgr: create control socket (50001)
+    ConnMgr->>Radio: areYouThere()
+    Radio-->>ConnMgr: iAmHere
+    ConnMgr->>Radio: areYouReady()
+    Radio-->>ConnMgr: loginResponse
+    Radio-->>ConnMgr: capabilities
+
+    RigCtrl->>ConnMgr: create serial socket (50002)
+    ConnMgr->>Radio: openSerial()
+    Radio-->>ConnMgr: serial opened
+
+    ConnMgr-->>RigCtrl: connectionState 'connected'
+    RigCtrl-->>Settings: connectionState 'connected'
+    Settings-->>User: show status (freq, mode, speed)
 ```
 
 ### 2. CW Send Sequence
 
-```
-┌──────────┐     ┌──────────────┐     ┌──────────┐     ┌─────────────┐     ┌─────────────┐     ┌────────┐
-│   User   │     │IC705RigCtrl  │     │ CWKeyer  │     │ OperationQ  │     │ConnectionMgr│     │  Radio │
-└────┬─────┘     └──────┬───────┘     └────┬─────┘     └──────┬──────┘     └──────┬──────┘     └───┬────┘
-     │                  │                  │                  │                  │                │
-     │  tap CQ button   │                  │                  │                  │                │
-     │─────────────────>│                  │                  │                  │                │
-     │                  │  sendTemplate()  │                  │                  │                │
-     │                  │─────────────────>│                  │                  │                │
-     │                  │                  │                  │                  │                │
-     │                  │                  │ interpolate vars │                  │                │
-     │                  │                  │ "$callsign" etc  │                  │                │
-     │                  │                  │────────┬         │                  │                │
-     │                  │                  │        │         │                  │                │
-     │                  │                  │<───────┘         │                  │                │
-     │                  │                  │                  │                  │                │
-     │                  │                  │ chunk message    │                  │                │
-     │                  │                  │ (max 30 chars)   │                  │                │
-     │                  │                  │─────────────────>│                  │                │
-     │                  │                  │                  │                  │                │
-     │                  │                  │                  │  enqueue sendCW  │                  │
-     │                  │                  │                  │─────────────────>│                │
-     │                  │                  │                  │                  │                │
-     │                  │                  │                  │  flush queue     │                │
-     │                  │                  │                  │  suspend traffic │                │
-     │                  │                  │                  │                  │                │
-     │                  │                  │                  │  buildSendCW()   │                │
-     │                  │                  │                  │  sendCIV()       │                │
-     │                  │                  │                  │─────────────────>│                │
-     │                  │                  │                  │                  │                │
-     │                  │                  │                  │                  │ UDP to port 50002
-     │                  │                  │                  │                  │───────────────>│
-     │                  │                  │                  │                  │                │
-     │                  │                  │                  │                  │     ACK        │
-     │                  │                  │                  │                  │<───────────────│
-     │                  │                  │                  │                  │                │
-     │                  │                  │                  │  completion(true)│                │
-     │                  │                  │                  │<─────────────────│                │
-     │                  │                  │                  │                  │                │
-     │                  │                  │                  │ resume traffic   │                │
-     │                  │                  │                  │ after delay      │                │
-     │                  │                  │                  │ (WPM-calculated) │                │
+```mermaid
+sequenceDiagram
+    actor User
+    participant RigCtrl as IC705RigControl
+    participant Keyer as CWKeyer
+    participant OpQueue as OperationQueue
+    participant ConnMgr as ConnectionManager
+    participant Radio as IC-705 Radio
+
+    User->>RigCtrl: tap CQ button
+    RigCtrl->>Keyer: sendTemplate(template, vars)
+
+    Note over Keyer: interpolate vars<br/>$callsign, $mycall, etc.
+    Note over Keyer: chunk message<br/>(max 30 chars)
+
+    Keyer->>OpQueue: enqueue sendCW
+    OpQueue->>ConnMgr: flush queue
+    OpQueue->>ConnMgr: suspend traffic
+    OpQueue->>ConnMgr: buildSendCW() + sendCIV()
+    ConnMgr->>Radio: UDP to port 50002
+    Radio-->>ConnMgr: ACK
+    ConnMgr-->>OpQueue: completion(true)
+
+    Note over OpQueue: resume traffic<br/>after WPM-calculated delay
 ```
 
 ### 3. Frequency Polling Sequence
 
-```
-┌───────────────┐     ┌──────────────┐     ┌─────────────┐     ┌────────┐
-│ConnectionMgr  │     │  OperationQ  │     │NativeUDPTx  │     │  Radio │
-└───────┬───────┘     └──────┬───────┘     └──────┬──────┘     └───┬────┘
-        │                    │                    │                │
-        │  ┌─────────────────────────────────────┐                │
-        │  │  Every 1000ms (when idle)           │                │
-        │  └─────────────────────────────────────┘                │
-        │                    │                    │                │
-        │  queryStatus()     │                    │                │
-        │───────────────────>│                    │                │
-        │                    │                    │                │
-        │                    │ enqueue 'status'   │                │
-        │                    │───────────────────>│                │
-        │                    │                    │                │
-        │                    │ buildReadFreq()    │                │
-        │                    │ sendCIV()          │                │
-        │                    │───────────────────>│                │
-        │                    │                    │                │
-        │                    │                    │ UDP to 50002   │
-        │                    │                    │───────────────>│
-        │                    │                    │                │
-        │                    │                    │ frequency data │
-        │                    │                    │<───────────────│
-        │                    │                    │                │
-        │                    │ buildReadMode()    │                │
-        │                    │ sendCIV()          │                │
-        │                    │───────────────────>│                │
-        │                    │                    │                │
-        │                    │                    │ UDP to 50002   │
-        │                    │                    │───────────────>│
-        │                    │                    │                │
-        │                    │                    │ mode data      │
-        │                    │                    │<───────────────│
-        │                    │                    │                │
-        │  emit              │                    │                │
-        │ 'frequencyChanged' │                    │                │
-        │<───────────────────│                    │                │
-        │                    │                    │                │
-        │  emit              │                    │                │
-        │  'modeChanged'     │                    │                │
-        │<───────────────────│                    │                │
+```mermaid
+sequenceDiagram
+    participant ConnMgr as ConnectionManager
+    participant OpQueue as OperationQueue
+    participant NativeTx as NativeUDPTransport
+    participant Radio as IC-705 Radio
+
+    Note over ConnMgr: Every 1000ms (when idle)
+
+    ConnMgr->>OpQueue: queryStatus()
+    OpQueue->>NativeTx: enqueue 'status'
+
+    OpQueue->>NativeTx: buildReadFreq() + sendCIV()
+    NativeTx->>Radio: UDP to port 50002
+    Radio-->>NativeTx: frequency data
+
+    OpQueue->>NativeTx: buildReadMode() + sendCIV()
+    NativeTx->>Radio: UDP to port 50002
+    Radio-->>NativeTx: mode data
+
+    OpQueue-->>ConnMgr: emit 'frequencyChanged'
+    OpQueue-->>ConnMgr: emit 'modeChanged'
 ```
 
 ---
